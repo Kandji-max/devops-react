@@ -1,0 +1,7 @@
+services:
+
+  frontend:
+    build: .
+    container_name: devops-react
+    ports:
+      - "8080:80"
