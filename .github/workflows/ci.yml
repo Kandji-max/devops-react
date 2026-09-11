@@ -1,0 +1,29 @@
+name: React CI
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+build:
+  runs-on: ubuntu-latest
+
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        note-version: 22
+        cache: npm
+    
+    - name: install dependencies
+      run: npm ci
+
+    - name: build application
+      run: npm run build
