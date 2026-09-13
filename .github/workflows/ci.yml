@@ -51,3 +51,27 @@ jobs:
 
       - name: Push docker image
         run: docker push ghcr.io/kandji-max/devops-react:${{ github.sha }}
+
+      - name: Configure ssh
+        run: |
+          mkdir -p ~/.ssh 
+          printf '%s\n' '${{ secrets.HOSTINGER_SSH_KEY }}' > ~/.ssh/hostinger_key
+          chmod 600 ~/.ssh/hostinger_key
+          ssh-keyscan  -p "${{ secrets.HOSTINGER_PORT }}" "${{ secrets.HOSTINGER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: clean page hostinger
+        run: |
+          ssh \
+          -i '~/.ssh/hostinger_key' \
+          -p "${{ secrets.HOSTINGER_PORT }}" \
+          "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}" \
+          'find ~/domains/olivedrab-snail-926046.hostingersite.com\public_html -mindepth 1 -maxdepth 1 -exec rm -rf {} +' 
+
+      - name: deploy react to hostinger
+        run: |
+          scp \
+            -i ~/.ssh/hostinger_key \
+            -P "${{ secrets.HOSTINGER_PORT }}" \
+            -r build/. \
+            "${{ secrets.HOSTINGER_USER }}@${{ secrets.HOSTINGER_HOST }}: ~/domains/olivedrab-snail-926046.hostingersite.com\public_html/"
+          
